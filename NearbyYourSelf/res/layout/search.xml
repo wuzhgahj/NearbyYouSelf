@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="match_parent"
+        >
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="40dp"
+                  android:orientation="horizontal"
+                  android:gravity="right"
+                  android:background="@drawable/bg_title_bar">
+        <ImageButton
+                android:id="@+id/btBack"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_nav_back"
+                android:background="@drawable/btnstate1"/>
+        <EditText
+                android:id="@+id/editText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:hint="请输入你要查询的名称"
+                android:background="@drawable/abs__textfield_search_selected_holo_dark"
+                />
+
+        <ImageButton
+                android:id="@+id/btSearchs"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/abs__ic_search"
+                android:background="@drawable/btnstate1"/>
+    </LinearLayout>
+    <ListView android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:id="@+id/listInfo"
+              android:background="#ffffff">
+
+    </ListView>
+</LinearLayout>

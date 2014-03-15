@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+        >
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="40dp">
+        <ImageView android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   android:background="@drawable/bg_title_bar"/>
+        <ImageButton android:layout_width="50dp"
+                     android:layout_height="match_parent"
+                     android:src="@drawable/abs__ic_search"
+                     android:background="@drawable/state"
+                     android:id="@+id/btSearch"/>
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="match_parent"
+                  android:text="搜周边"
+                  android:textSize="20dp"
+                  android:textColor="#ffffff"
+                  android:layout_centerInParent="true"
+                  android:layout_marginTop="10dp"/>
+        <ImageButton android:layout_width="50dp"
+                     android:layout_height="match_parent"
+                     android:src="@drawable/ic_action_setting"
+                     android:background="@drawable/state"
+                     android:layout_alignParentRight="true"
+                     android:id="@+id/btnSetting"
+                />
+    </RelativeLayout>
+
+    <ListView android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:id="@+id/listView"
+              android:layout_weight="1"
+              android:divider="#ff130f00"
+              android:dividerHeight="2px"
+              android:background="#ffe8e8e8">
+    </ListView>
+
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="40dp">
+        <ImageView android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   android:background="@drawable/bg_title_bar"/>
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="match_parent"
+                  android:id="@+id/addressText"
+                  android:textColor="#ff040404"/>
+        <ImageButton android:layout_width="50dp"
+                     android:layout_height="match_parent"
+                     android:layout_alignParentRight="true"
+                     android:src="@drawable/ic_localbar_location"
+                     android:background="@drawable/state"
+                     android:id="@+id/btLocation"
+                />
+    </RelativeLayout>
+
+</LinearLayout>
+
