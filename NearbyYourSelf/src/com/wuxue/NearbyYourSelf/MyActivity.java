@@ -75,6 +75,7 @@ public class MyActivity extends Activity {
 //        option.setIsNeedAddress(true);
 ////      设定返回的结果中是否包含手机机头的方向
 //        option.setNeedDeviceDirect(true);
+
         LocationClientOption option = new LocationClientOption();
         option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);//设置定位模式
         option.setCoorType("bd09ll");//返回的定位结果是百度经纬度，默认值gcj02
