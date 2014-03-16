@@ -28,7 +28,7 @@ public class MyActivity extends Activity {
     private ListView listView;
     private List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
     private LocationClient locationClient = null;
-    private final String TAG = "adress";
+    private final String TAG = "address";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
