@@ -11,6 +11,8 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,11 +27,10 @@ public class MyActivity extends Activity {
     private ImageButton btSetting;
     private ImageButton btLocation;
     private TextView addressText;
-    private ListView listView;
+    private PullToRefreshListView listView;
     private List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
     private LocationClient locationClient = null;
     private final String TAG = "address";
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,11 +51,12 @@ public class MyActivity extends Activity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("position",""+position);
+                Log.d("position", "" + position);
                 adapter.notifyDataSetChanged();
             }
         });
 
+        listView.getShowViewWhileRefreshing();
 
         btLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,15 +67,15 @@ public class MyActivity extends Activity {
         });
 
 //        LocationClientOption option = new LocationClientOption();
-////      设置高精准模式
+//      设置高精准模式
 //        option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
-////      返回的结果是百度的经纬度,默认是gcj02
+//      返回的结果是百度的经纬度,默认是gcj02
 //        option.setCoorType("bd09ll");
-////      设定发起请求的时间间隔
+//      设定发起请求的时间间隔
 //        option.setScanSpan(1000);
-////      设定的返回结果中包含地址信息
+//      设定的返回结果中包含地址信息
 //        option.setIsNeedAddress(true);
-////      设定返回的结果中是否包含手机机头的方向
+//      设定返回的结果中是否包含手机机头的方向
 //        option.setNeedDeviceDirect(true);
 
         LocationClientOption option = new LocationClientOption();
@@ -111,7 +113,7 @@ public class MyActivity extends Activity {
         btSetting = (ImageButton) findViewById(R.id.btnSetting);
         btLocation = (ImageButton) findViewById(R.id.btLocation);
         addressText = (TextView) findViewById(R.id.addressText);
-        listView = (ListView) findViewById(R.id.listView);
+        listView = (PullToRefreshListView) findViewById(R.id.pull_to_refresh_listview);
         HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("servers", "餐饮服务");
         list.add(map);
