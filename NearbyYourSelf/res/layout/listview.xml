@@ -4,6 +4,7 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:gravity="center_vertical"
+              android:id="@+id/layout"
               android:descendantFocusability="blocksDescendants">
     <TextView android:layout_width="match_parent"
               android:layout_height="wrap_content"
