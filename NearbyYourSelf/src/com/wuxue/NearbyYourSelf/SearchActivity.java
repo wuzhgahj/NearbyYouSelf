@@ -100,11 +100,20 @@ public class SearchActivity extends Activity {
                 }
             }
         });
+
+        //加刷新监听事件
         listInfo.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<ListView>() {
             @Override
             public void onRefresh(PullToRefreshBase<ListView> refreshView) {
                 // Do work to refresh the list here.
                 new GetDataTask().execute();
+            }
+        });
+        //添加点击事件
+        listInfo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
             }
         });
     }
