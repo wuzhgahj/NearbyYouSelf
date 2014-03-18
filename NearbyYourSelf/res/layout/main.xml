@@ -36,7 +36,8 @@
               android:layout_weight="1"
               android:divider="#ff130f00"
               android:dividerHeight="2px"
-              android:background="#ffe8e8e8">
+              android:background="#ffe8e8e8"
+              android:cacheColorHint="#00000000">
     </ListView>
     <!--<com.handmark.pulltorefresh.library.PullToRefreshListView-->
             <!--android:id= "@+id/pull_to_refresh_listview"-->

@@ -31,10 +31,15 @@
                 android:src="@drawable/abs__ic_search"
                 android:background="@drawable/btnstate1"/>
     </LinearLayout>
-    <ListView android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:id="@+id/listInfo"
-              android:background="#ffffff">
+    <com.handmark.pulltorefresh.library.PullToRefreshListView
+            android:id= "@+id/listInfo"
+            android:layout_height= "match_parent"
+            android:layout_width= "fill_parent"
+            android:layout_weight="1"
+            android:divider="#ff130f00"
+            android:dividerHeight="2px"
+            android:background="#ffe8e8e8"
+            android:cacheColorHint="#00000000"
+            />
 
-    </ListView>
 </LinearLayout>
