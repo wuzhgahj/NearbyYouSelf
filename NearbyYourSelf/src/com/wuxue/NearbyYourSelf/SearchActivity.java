@@ -1,27 +1,18 @@
 package com.wuxue.NearbyYourSelf;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.*;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +23,9 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -51,6 +44,10 @@ public class SearchActivity extends Activity {
     private String province_name;
     private String name;
     private String telephone;
+    private String category;
+    private int page = 10;
+    private SimpleAdapter adapter;
+    private List<Map<String,Object>> list = new ArrayList<Map<String, Object>>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +69,13 @@ public class SearchActivity extends Activity {
                 } else {
                     Log.d(TAG, "进来了");
                     search();
+                    adapter = new SimpleAdapter
+                            (SearchActivity.this,list,R.layout.listinfo,
+                                    new String[]{"city_name","province_name","name","telephone"},
+                                    new int[]{R.id.textInfo1,R.id.textInfo2,
+                                            R.id.textInfo3,R.id.textInfo4});
+                    listInfo.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
                 }
             }
         });
@@ -138,10 +142,24 @@ public class SearchActivity extends Activity {
                 try {
                     JSONObject jsonObject = new JSONObject(resultStr);
                     JSONArray jsonArray = (JSONArray) jsonObject.get("pois");
-                    resultStr = jsonArray.getString(0);
-                    jsonObject = new JSONObject(resultStr);
-                    resultStr = (String) jsonObject.get("category");
-                    Log.d(TAG+"Result",resultStr);
+//                    resultStr = jsonArray.getString(0);
+//                    jsonObject = new JSONObject(resultStr);
+//                    Log.d(TAG+"Result",category);
+                    for(int i = 0 ; i < jsonArray.length() ; i++){
+                        Log.d(TAG,i + "  这是");
+                        resultStr = jsonArray.getString(i);
+                        jsonObject = new JSONObject(resultStr);
+                        city_name = (String) jsonObject.get("city_name");
+                        province_name = (String) jsonObject.get("province_name");
+                        name = (String) jsonObject.get("name");
+                        telephone = (String) jsonObject.get("telephone");
+                        Map<String,Object> map = new HashMap<String, Object>();
+                        map.put("city_name", city_name);
+                        map.put("province_name", province_name);
+                        map.put("name", name);
+                        map.put("telephone",telephone);
+                        list.add(map);
+                    }
                 } catch (JSONException e) {
                     Log.e(TAG+"error", e.getMessage().toString());
                 }
