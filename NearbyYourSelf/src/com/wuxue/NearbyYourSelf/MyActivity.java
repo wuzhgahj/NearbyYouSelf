@@ -39,10 +39,11 @@ public class MyActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
         init();
-        final SimpleAdapter adapter = new SimpleAdapter(
+        final ListViewAdapter adapter = new ListViewAdapter(
                 this, list, R.layout.listview, new String[]{"servers"},
                 new int[]{R.id.textView});
         listView.setAdapter(adapter);
+
         btSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
