@@ -50,11 +50,14 @@ public class MyActivity extends Activity {
         btSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(nowLongitude==null||nowLatitude==null||intent==null){
+                if(((String)nowLongitude)==null||((String)nowLatitude)==null||intent==null){
+                    Log.d(TAG,"double是空的啊");
                     Toast.makeText(MyActivity.this,"定位中,请稍等...",Toast.LENGTH_SHORT).show();
-                }else
-                search();
-                startActivity(intent);
+                }else{
+                    search();
+                    startActivity(intent);
+                }
+
             }
         });
 
@@ -146,8 +149,13 @@ public class MyActivity extends Activity {
     }
 
     public void search() {
-        Intent intent = new Intent(this, SearchActivity.class);
-        startActivity(intent);
+        if(addressText==null||addressText.equals("")){
+            Toast.makeText(this,"定位中,请稍等....",Toast.LENGTH_SHORT).show();
+        }else {
+            Intent intent = new Intent(this, SearchActivity.class);
+            startActivity(intent);
+        }
+
     }
 
     private void location() {

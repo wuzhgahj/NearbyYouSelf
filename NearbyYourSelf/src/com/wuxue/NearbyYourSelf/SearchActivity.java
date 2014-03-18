@@ -2,12 +2,16 @@ package com.wuxue.NearbyYourSelf;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.*;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -35,7 +39,7 @@ import java.util.Map;
 public class SearchActivity extends Activity {
     private ImageButton btBack;
     private EditText editText;
-    private ListView listInfo;
+    private PullToRefreshListView listInfo;
     private ImageButton btSearchs;
     private String text;
     private final String CITY_CODE = "0029";
@@ -44,7 +48,7 @@ public class SearchActivity extends Activity {
     private String name;
     private String telephone;
     private String address;
-    private int page = 10;
+    private int page = 5;
     private SimpleAdapter adapter;
     private List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
     private static double DEF_PI = 3.14159265359; // PI
@@ -57,6 +61,10 @@ public class SearchActivity extends Activity {
     private double shopLatitude;
     private ProgressDialog progressDialog;
     private double distance;
+    private int a = 0;//这个变量a 本人认为非常之叼,负责不重复显示
+    private String old;//这个old也非常叼,主要判断是否查询同样的参数
+    private HttpGet request = null;
+    private final DefaultHttpClient client = new DefaultHttpClient();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +75,8 @@ public class SearchActivity extends Activity {
         btBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = new Intent(SearchActivity.this, MyActivity.class);
+                startActivity(intent);
                 finish();
             }
         });
@@ -74,27 +84,56 @@ public class SearchActivity extends Activity {
             @Override
             public void onClick(View v) {
                 text = getEditText();
+                //判断是否为空
                 if (text == null || text.equals("")) {
                     Toast.makeText(SearchActivity.this, "请输入要搜索的东东", Toast.LENGTH_SHORT).show();
                 } else {
                     Log.d(TAG, "进来了");
+                //向http发送请求,并且给ArrayList<Map<String,Object>> list 初始化
                     search();
                     adapter = new SimpleAdapter
                             (SearchActivity.this, list, R.layout.listinfo,
                                     new String[]{"name", "address", "distance"},
                                     new int[]{R.id.textInfo1, R.id.textInfo2, R.id.textInfo3});
                     listInfo.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
+                    old = text;
                 }
             }
         });
+        listInfo.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<ListView>() {
+            @Override
+            public void onRefresh(PullToRefreshBase<ListView> refreshView) {
+                // Do work to refresh the list here.
+                new GetDataTask().execute();
+            }
+        });
     }
+
+    private class GetDataTask extends AsyncTask<Void, Void, String[]> {
+        @Override
+        protected String[] doInBackground(Void... params) {
+            //控制下拉刷新显示的条数
+            page += 5;
+            refreshSearch();
+            return new String[0];
+        }
+
+        @Override
+        protected void onPostExecute(String[] result) {
+            // Call onRefreshComplete when the list has been refreshed.
+            //完成后解析json,并且adapter.notifyDataChanged();
+            refreshComplete();
+            listInfo.onRefreshComplete();
+            super.onPostExecute(result);
+        }
+    }
+
 
     //初始化各种....
     public void init() {
         btBack = (ImageButton) findViewById(R.id.btBack);
         editText = (EditText) findViewById(R.id.editText);
-        listInfo = (ListView) findViewById(R.id.listInfo);
+        listInfo = (PullToRefreshListView) findViewById(R.id.listInfo);
         btSearchs = (ImageButton) findViewById(R.id.btSearchs);
         nowLatitude = Double.valueOf(getIntent().getStringExtra("nowLatitude"));
         nowLongitude = Double.valueOf(getIntent().getStringExtra("nowLongitude"));
@@ -111,72 +150,38 @@ public class SearchActivity extends Activity {
 
     //查找要查的东西
     public void search() {
+        page = 5;
         try {
             text = URLEncoder.encode(text, "utf-8");
         } catch (UnsupportedEncodingException e) {
             Log.e(TAG, e.getMessage().toString());
         }
-        final String url = "https://api.weibo.com/2/location/pois/search/by_geo.json?city=" + CITY_CODE + "&" + "q=" + text + "&" + "access_token=2.003bqBkC0rLoqt8775fb7bffR7utyC";
+        if (!text.equals(old)) {
+            list.clear();
+        }else{
+            return;
+        }
+        final String url = "https://api.weibo.com/2/location/pois/search/by_geo.json?city=" + CITY_CODE + "&" + "q=" + text + "&" + "access_token=2.003bqBkC0rLoqt8775fb7bffR7utyC" + "&" + "count=" + page;
         Log.d(TAG, url);
-        final HttpGet request = new HttpGet(url);
+        request = new HttpGet(url);
         int timeout = 30000;
         HttpParams params = new BasicHttpParams();
         HttpConnectionParams.setSoTimeout(params, timeout);
         HttpConnectionParams.setConnectionTimeout(params, timeout);
-        final DefaultHttpClient client = new DefaultHttpClient();
+
         client.setParams(params);
         AsyncTask<Integer, Integer, Integer> task = new AsyncTask<Integer, Integer, Integer>() {
             @Override
             protected Integer doInBackground(Integer... params) {
-                try {
-                    HttpResponse response = client.execute(request);
-                    InputStream inputStream = response.getEntity().getContent();
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    byte[] buf = new byte[1024];
-                    int length;
-                    while ((length = inputStream.read(buf)) != -1) {
-                        outputStream.write(buf, 0, length);
-                    }
-                    outputStream.close();
-                    inputStream.close();
-                    resultStr = outputStream.toString("UTF-8");
-                    Log.d(TAG, resultStr);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                requestHttp(request);
                 return 0;
             }
-
 
             @Override
             protected void onPostExecute(Integer integer) {
                 progressDialog.dismiss();
                 Toast.makeText(SearchActivity.this, "查询成功", Toast.LENGTH_SHORT).show();
-                try {
-                    JSONObject rootJsonObject = new JSONObject(resultStr);
-                    Log.d("wawawawawa", rootJsonObject.toString());
-                    JSONArray poilistJsonArray = rootJsonObject.optJSONArray("poilist");
-                    for (int i = 0; i < poilistJsonArray.length(); i++) {
-                        JSONObject poiJsonObject = (JSONObject) poilistJsonArray.get(i);
-                        name = (String) poiJsonObject.get("name");
-                        address = (String) poiJsonObject.get("address");
-                        telephone = (String) poiJsonObject.get("tel");
-                        shopLongitude = Double.parseDouble((String)poiJsonObject.get("x"));
-                        shopLatitude = Double.parseDouble((String)poiJsonObject.get("y"));
-                        distance = GetShortDistance(shopLatitude, shopLongitude, nowLatitude, nowLongitude);
-
-                        distance = distance / 1000;
-
-                        Log.d(TAG, name + address + telephone);
-                        Map<String, Object> map = new HashMap<String, Object>();
-                        map.put("name", name);
-                        map.put("address", address);
-                        map.put("distance", (int)distance + "km");
-                        list.add(map);
-                    }
-                } catch (JSONException e) {
-                    Log.e(TAG + "error", e.getMessage().toString());
-                }
+                jsonbt();
             }
 
             @Override
@@ -187,15 +192,157 @@ public class SearchActivity extends Activity {
                 super.onPreExecute();
             }
 
-            @Override
-            protected void onProgressUpdate(Integer... values) {
-
-                super.onProgressUpdate(values);
-            }
         };
         task.execute(0);
     }
 
+    //这是下拉事件调用的解析json的方法
+    public void json() {
+        try {
+            JSONObject rootJsonObject = new JSONObject(resultStr);
+            Log.d(TAG, rootJsonObject.toString());
+            JSONArray poilistJsonArray = rootJsonObject.optJSONArray("poilist");
+            if (poilistJsonArray == null) {
+                Toast.makeText(this, "查不到结果哦", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            for (int i = a; i < poilistJsonArray.length(); i++) {
+                JSONObject poiJsonObject = (JSONObject) poilistJsonArray.get(i);
+                name = (String) poiJsonObject.get("name");
+                address = (String) poiJsonObject.get("address");
+                telephone = (String) poiJsonObject.get("tel");
+                shopLongitude = Double.parseDouble((String) poiJsonObject.get("x"));
+                shopLatitude = Double.parseDouble((String) poiJsonObject.get("y"));
+                distance = GetShortDistance(shopLatitude, shopLongitude, nowLatitude, nowLongitude);
+                distance = distance / 1000;
+                Log.d(TAG, name + address + telephone);
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("name", name);
+                map.put("address", address);
+                map.put("distance", (int) distance + "km");
+                list.add(map);
+            }
+            a += 5;
+        } catch (JSONException e) {
+            Log.e(TAG + "error", e.getMessage().toString());
+        }
+    }
+
+    //这是搜索的点击事件里调用的解析json
+    public void jsonbt() {
+        a = 0;
+        adapter.notifyDataSetChanged();
+        try {
+            JSONObject rootJsonObject = new JSONObject(resultStr);
+            Log.d(TAG, rootJsonObject.toString());
+            JSONArray poilistJsonArray = rootJsonObject.optJSONArray("poilist");
+            if (poilistJsonArray == null) {
+                Toast.makeText(this, "查不到结果哦", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            for (int i = a; i < poilistJsonArray.length(); i++) {
+                JSONObject poiJsonObject = (JSONObject) poilistJsonArray.get(i);
+                name = (String) poiJsonObject.get("name");
+                address = (String) poiJsonObject.get("address");
+                telephone = (String) poiJsonObject.get("tel");
+                shopLongitude = Double.parseDouble((String) poiJsonObject.get("x"));
+                shopLatitude = Double.parseDouble((String) poiJsonObject.get("y"));
+                distance = GetShortDistance(shopLatitude, shopLongitude, nowLatitude, nowLongitude);
+                distance = distance / 1000;
+                Log.d(TAG, name + address + telephone);
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("name", name);
+                map.put("address", address);
+                map.put("distance", (int) distance + "km");
+                list.add(map);
+            }
+            a += 5;
+        } catch (JSONException e) {
+            Log.e(TAG + "error", e.getMessage().toString());
+        }
+    }
+
+    //向服务器发送请求
+    public void requestHttp(HttpGet request) {
+        try {
+            HttpResponse response = client.execute(request);
+            InputStream inputStream = response.getEntity().getContent();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] buf = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buf)) != -1) {
+                outputStream.write(buf, 0, length);
+            }
+            outputStream.close();
+            inputStream.close();
+            resultStr = outputStream.toString("UTF-8");
+            Log.d(TAG, resultStr);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //下拉刷新的请求
+    public void refreshSearch() {
+        final String url = "https://api.weibo.com/2/location/pois/search/by_geo.json?city=" + CITY_CODE + "&" + "q=" + text + "&" + "access_token=2.003bqBkC0rLoqt8775fb7bffR7utyC" + "&" + "count=" + page;
+        Log.d(TAG, url);
+        final HttpGet request = new HttpGet(url);
+        int timeout = 30000;
+        HttpParams params = new BasicHttpParams();
+        HttpConnectionParams.setSoTimeout(params, timeout);
+        HttpConnectionParams.setConnectionTimeout(params, timeout);
+        final DefaultHttpClient client = new DefaultHttpClient();
+        client.setParams(params);
+//        HttpResponse response = null;
+//        try {
+//            response = client.execute(request);
+//            InputStream inputStream = response.getEntity().getContent();
+//            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//            byte[] buf = new byte[1024];
+//            int length;
+//            while ((length = inputStream.read(buf)) != -1) {
+//                outputStream.write(buf, 0, length);
+//            }
+//            outputStream.close();
+//            inputStream.close();
+//            resultStr = outputStream.toString("UTF-8");
+//            Log.d(TAG, resultStr);
+//        } catch (IOException e1) {
+//            e1.printStackTrace();
+//        }
+        requestHttp(request);
+    }
+
+    public void refreshComplete() {
+        json();
+//        try {
+//            JSONObject rootJsonObject = new JSONObject(resultStr);
+//            Log.d(TAG, rootJsonObject.toString());
+//            JSONArray poilistJsonArray = rootJsonObject.optJSONArray("poilist");
+//            for (int i = 0; i < poilistJsonArray.length(); i++) {
+//                JSONObject poiJsonObject = (JSONObject) poilistJsonArray.get(i);
+//                name = (String) poiJsonObject.get("name");
+//                address = (String) poiJsonObject.get("address");
+//                telephone = (String) poiJsonObject.get("tel");
+//                shopLongitude = Double.parseDouble((String) poiJsonObject.get("x"));
+//                shopLatitude = Double.parseDouble((String) poiJsonObject.get("y"));
+//                distance = GetShortDistance(shopLatitude, shopLongitude, nowLatitude, nowLongitude);
+//
+//                distance = distance / 1000;
+//
+//                Log.d(TAG, name + address + telephone);
+//                Map<String, Object> map = new HashMap<String, Object>();
+//                map.put("name", name);
+//                map.put("address", address);
+//                map.put("distance", (int) distance + "km");
+//                list.add(map);
+//            }
+//        } catch (JSONException e) {
+//            Log.e(TAG + "error", e.getMessage().toString());
+//        }
+    }
+
+    //获取两点之间的距离
     public double GetShortDistance(double lon1, double lat1, double lon2, double lat2) {
         double ew1, ns1, ew2, ns2;
         double dx, dy, dew;
