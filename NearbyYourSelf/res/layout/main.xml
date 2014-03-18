@@ -30,22 +30,22 @@
                 />
     </RelativeLayout>
 
-    <!--<ListView android:layout_width="match_parent"-->
-              <!--android:layout_height="match_parent"-->
-              <!--android:id="@+id/listView"-->
-              <!--android:layout_weight="1"-->
-              <!--android:divider="#ff130f00"-->
-              <!--android:dividerHeight="2px"-->
-              <!--android:background="#ffe8e8e8">-->
-    <!--</ListView>-->
-    <com.handmark.pulltorefresh.library.PullToRefreshListView
-            android:id= "@+id/pull_to_refresh_listview"
-            android:layout_height= "fill_parent"
-            android:layout_width= "fill_parent"
-            android:layout_weight="1"
-            android:divider="#ff130f00"
-            android:dividerHeight="2px"
-            android:background="#ffe8e8e8"/>
+    <ListView android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:id="@+id/listView"
+              android:layout_weight="1"
+              android:divider="#ff130f00"
+              android:dividerHeight="2px"
+              android:background="#ffe8e8e8">
+    </ListView>
+    <!--<com.handmark.pulltorefresh.library.PullToRefreshListView-->
+            <!--android:id= "@+id/pull_to_refresh_listview"-->
+            <!--android:layout_height= "fill_parent"-->
+            <!--android:layout_width= "fill_parent"-->
+            <!--android:layout_weight="1"-->
+            <!--android:divider="#ff130f00"-->
+            <!--android:dividerHeight="2px"-->
+            <!--android:background="#ffe8e8e8"/>-->
 
     <RelativeLayout android:layout_width="match_parent"
                     android:layout_height="40dp">
