@@ -1,6 +1,7 @@
 package com.wuxue.NearbyYourSelf;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,16 +39,25 @@ public class SearchActivity extends Activity {
     private ImageButton btSearchs;
     private String text;
     private final String CITY_CODE = "0029";
-    private final String TAG = "Nearby";
+    private final String TAG = "wawawawa";
     private String resultStr;
-    private String city_name;
-    private String province_name;
     private String name;
     private String telephone;
-    private String category;
+    private String address;
     private int page = 10;
     private SimpleAdapter adapter;
-    private List<Map<String,Object>> list = new ArrayList<Map<String, Object>>();
+    private List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+    private static double DEF_PI = 3.14159265359; // PI
+    private static double DEF_2PI = 6.28318530712; // 2*PI
+    private static double DEF_PI180 = 0.01745329252; // PI/180.0
+    private static double DEF_R = 6370693.5; // radius of earth
+    private double nowLongitude;
+    private double nowLatitude;
+    private double shopLongitude;
+    private double shopLatitude;
+    private ProgressDialog progressDialog;
+    private double distance;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,10 +80,9 @@ public class SearchActivity extends Activity {
                     Log.d(TAG, "进来了");
                     search();
                     adapter = new SimpleAdapter
-                            (SearchActivity.this,list,R.layout.listinfo,
-                                    new String[]{"city_name","province_name","name","telephone"},
-                                    new int[]{R.id.textInfo1,R.id.textInfo2,
-                                            R.id.textInfo3,R.id.textInfo4});
+                            (SearchActivity.this, list, R.layout.listinfo,
+                                    new String[]{"name", "address", "distance"},
+                                    new int[]{R.id.textInfo1, R.id.textInfo2, R.id.textInfo3});
                     listInfo.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
                 }
@@ -87,6 +96,8 @@ public class SearchActivity extends Activity {
         editText = (EditText) findViewById(R.id.editText);
         listInfo = (ListView) findViewById(R.id.listInfo);
         btSearchs = (ImageButton) findViewById(R.id.btSearchs);
+        nowLatitude = Double.valueOf(getIntent().getStringExtra("nowLatitude"));
+        nowLongitude = Double.valueOf(getIntent().getStringExtra("nowLongitude"));
     }
 
     //获取editText的数据
@@ -105,8 +116,8 @@ public class SearchActivity extends Activity {
         } catch (UnsupportedEncodingException e) {
             Log.e(TAG, e.getMessage().toString());
         }
-        final String url = "https://api.weibo.com/2/location/pois/search/by_location.json?city="+CITY_CODE+"&"+"q="+text +"&"+"access_token=2.003bqBkC0rLoqt8775fb7bffR7utyC";
-        Log.d(TAG,url);
+        final String url = "https://api.weibo.com/2/location/pois/search/by_geo.json?city=" + CITY_CODE + "&" + "q=" + text + "&" + "access_token=2.003bqBkC0rLoqt8775fb7bffR7utyC";
+        Log.d(TAG, url);
         final HttpGet request = new HttpGet(url);
         int timeout = 30000;
         HttpParams params = new BasicHttpParams();
@@ -136,35 +147,75 @@ public class SearchActivity extends Activity {
                 return 0;
             }
 
+
             @Override
             protected void onPostExecute(Integer integer) {
+                progressDialog.dismiss();
                 Toast.makeText(SearchActivity.this, "查询成功", Toast.LENGTH_SHORT).show();
                 try {
-                    JSONObject jsonObject = new JSONObject(resultStr);
-                    JSONArray jsonArray = (JSONArray) jsonObject.get("pois");
-//                    resultStr = jsonArray.getString(0);
-//                    jsonObject = new JSONObject(resultStr);
-//                    Log.d(TAG+"Result",category);
-                    for(int i = 0 ; i < jsonArray.length() ; i++){
-                        Log.d(TAG,i + "  这是");
-                        resultStr = jsonArray.getString(i);
-                        jsonObject = new JSONObject(resultStr);
-                        city_name = (String) jsonObject.get("city_name");
-                        province_name = (String) jsonObject.get("province_name");
-                        name = (String) jsonObject.get("name");
-                        telephone = (String) jsonObject.get("telephone");
-                        Map<String,Object> map = new HashMap<String, Object>();
-                        map.put("city_name", city_name);
-                        map.put("province_name", province_name);
+                    JSONObject rootJsonObject = new JSONObject(resultStr);
+                    Log.d("wawawawawa", rootJsonObject.toString());
+                    JSONArray poilistJsonArray = rootJsonObject.optJSONArray("poilist");
+                    for (int i = 0; i < poilistJsonArray.length(); i++) {
+                        JSONObject poiJsonObject = (JSONObject) poilistJsonArray.get(i);
+                        name = (String) poiJsonObject.get("name");
+                        address = (String) poiJsonObject.get("address");
+                        telephone = (String) poiJsonObject.get("tel");
+                        shopLongitude = Double.parseDouble((String)poiJsonObject.get("x"));
+                        shopLatitude = Double.parseDouble((String)poiJsonObject.get("y"));
+                        distance = GetShortDistance(shopLatitude, shopLongitude, nowLatitude, nowLongitude);
+
+                        distance = distance / 1000;
+
+                        Log.d(TAG, name + address + telephone);
+                        Map<String, Object> map = new HashMap<String, Object>();
                         map.put("name", name);
-                        map.put("telephone",telephone);
+                        map.put("address", address);
+                        map.put("distance", (int)distance + "km");
                         list.add(map);
                     }
                 } catch (JSONException e) {
-                    Log.e(TAG+"error", e.getMessage().toString());
+                    Log.e(TAG + "error", e.getMessage().toString());
                 }
+            }
+
+            @Override
+            protected void onPreExecute() {
+                progressDialog = new ProgressDialog(SearchActivity.this);
+                progressDialog.setMessage("加载中...");
+                progressDialog.show();
+                super.onPreExecute();
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+
+                super.onProgressUpdate(values);
             }
         };
         task.execute(0);
+    }
+
+    public double GetShortDistance(double lon1, double lat1, double lon2, double lat2) {
+        double ew1, ns1, ew2, ns2;
+        double dx, dy, dew;
+        double distance;
+        // 角度转换为弧度
+        ew1 = lon1 * DEF_PI180;
+        ns1 = lat1 * DEF_PI180;
+        ew2 = lon2 * DEF_PI180;
+        ns2 = lat2 * DEF_PI180;
+        // 经度差
+        dew = ew1 - ew2;
+        // 若跨东经和西经180 度，进行调整
+        if (dew > DEF_PI)
+            dew = DEF_2PI - dew;
+        else if (dew < -DEF_PI)
+            dew = DEF_2PI + dew;
+        dx = DEF_R * Math.cos(ns1) * dew; // 东西方向长度(在纬度圈上的投影长度)
+        dy = DEF_R * (ns1 - ns2); // 南北方向长度(在经度圈上的投影长度)
+        // 勾股定理求斜边长
+        distance = Math.sqrt(dx * dx + dy * dy);
+        return distance;
     }
 }
