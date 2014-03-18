@@ -5,13 +5,16 @@
               android:layout_height="fill_parent"
               android:gravity="center_vertical"
               android:id="@+id/layout"
-              android:descendantFocusability="blocksDescendants">
+              >
+    <!--android:descendantFocusability="blocksDescendants"-->
     <TextView android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:id="@+id/textView"
               android:layout_weight="1"
               android:textSize="15dp"
-              android:textColor="#ff130f00">
+              android:textColor="#ff130f00"
+              android:textIsSelectable="true"
+            >
     </TextView>
     <ImageButton android:layout_width="50dp"
                  android:layout_height="wrap_content"
