@@ -50,6 +50,7 @@ public class SearchActivity extends Activity {
     private String city_name;
     private String province_name;
     private String name;
+    private String telephone;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
