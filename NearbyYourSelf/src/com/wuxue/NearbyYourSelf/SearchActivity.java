@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.*;
@@ -89,7 +90,7 @@ public class SearchActivity extends Activity {
                     Toast.makeText(SearchActivity.this, "请输入要搜索的东东", Toast.LENGTH_SHORT).show();
                 } else {
                     Log.d(TAG, "进来了");
-                //向http发送请求,并且给ArrayList<Map<String,Object>> list 初始化
+                    //向http发送请求,并且给ArrayList<Map<String,Object>> list 初始化
                     search();
                     adapter = new SimpleAdapter
                             (SearchActivity.this, list, R.layout.listinfo,
@@ -113,7 +114,14 @@ public class SearchActivity extends Activity {
         listInfo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                Map<String, Object> map = list.get(position);
+                Intent intent = new Intent(SearchActivity.this, BaiduMapActivity.class);
+                intent.putExtra("shopLatitude", map.get("shopLatitude").toString());
+                intent.putExtra("shopLongitude", map.get("shopLongitude").toString());
+                intent.putExtra("nowLongitude", nowLongitude);
+                intent.putExtra("nowLatitude", nowLatitude);
+                Log.d(TAG, shopLatitude + " 商店 " + shopLongitude + " 自己 " + nowLatitude + nowLongitude);
+                startActivity(intent);
             }
         });
     }
@@ -148,6 +156,14 @@ public class SearchActivity extends Activity {
         nowLongitude = Double.valueOf(getIntent().getStringExtra("nowLongitude"));
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode==KeyEvent.KEYCODE_BACK){
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
     //获取editText的数据
     public String getEditText() {
         text = editText.getText().toString();
@@ -167,7 +183,7 @@ public class SearchActivity extends Activity {
         }
         if (!text.equals(old)) {
             list.clear();
-        }else{
+        } else {
             return;
         }
         final String url = "https://api.weibo.com/2/location/pois/search/by_geo.json?city=" + CITY_CODE + "&" + "q=" + text + "&" + "access_token=2.003bqBkC0rLoqt8775fb7bffR7utyC" + "&" + "count=" + page;
@@ -229,6 +245,10 @@ public class SearchActivity extends Activity {
                 map.put("name", name);
                 map.put("address", address);
                 map.put("distance", (int) distance + "km");
+                map.put("shopLongitude", shopLongitude);
+                map.put("shopLatitude", shopLatitude);
+                map.put("nowLongitude", nowLongitude);
+                map.put("nowLatitude", nowLatitude);
                 list.add(map);
             }
             a += 5;
@@ -263,6 +283,10 @@ public class SearchActivity extends Activity {
                 map.put("name", name);
                 map.put("address", address);
                 map.put("distance", (int) distance + "km");
+                map.put("shopLongitude", shopLongitude);
+                map.put("shopLatitude", shopLatitude);
+                map.put("nowLongitude", nowLongitude);
+                map.put("nowLatitude", nowLatitude);
                 list.add(map);
             }
             a += 5;
@@ -302,53 +326,11 @@ public class SearchActivity extends Activity {
         HttpConnectionParams.setConnectionTimeout(params, timeout);
         final DefaultHttpClient client = new DefaultHttpClient();
         client.setParams(params);
-//        HttpResponse response = null;
-//        try {
-//            response = client.execute(request);
-//            InputStream inputStream = response.getEntity().getContent();
-//            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//            byte[] buf = new byte[1024];
-//            int length;
-//            while ((length = inputStream.read(buf)) != -1) {
-//                outputStream.write(buf, 0, length);
-//            }
-//            outputStream.close();
-//            inputStream.close();
-//            resultStr = outputStream.toString("UTF-8");
-//            Log.d(TAG, resultStr);
-//        } catch (IOException e1) {
-//            e1.printStackTrace();
-//        }
         requestHttp(request);
     }
 
     public void refreshComplete() {
         json();
-//        try {
-//            JSONObject rootJsonObject = new JSONObject(resultStr);
-//            Log.d(TAG, rootJsonObject.toString());
-//            JSONArray poilistJsonArray = rootJsonObject.optJSONArray("poilist");
-//            for (int i = 0; i < poilistJsonArray.length(); i++) {
-//                JSONObject poiJsonObject = (JSONObject) poilistJsonArray.get(i);
-//                name = (String) poiJsonObject.get("name");
-//                address = (String) poiJsonObject.get("address");
-//                telephone = (String) poiJsonObject.get("tel");
-//                shopLongitude = Double.parseDouble((String) poiJsonObject.get("x"));
-//                shopLatitude = Double.parseDouble((String) poiJsonObject.get("y"));
-//                distance = GetShortDistance(shopLatitude, shopLongitude, nowLatitude, nowLongitude);
-//
-//                distance = distance / 1000;
-//
-//                Log.d(TAG, name + address + telephone);
-//                Map<String, Object> map = new HashMap<String, Object>();
-//                map.put("name", name);
-//                map.put("address", address);
-//                map.put("distance", (int) distance + "km");
-//                list.add(map);
-//            }
-//        } catch (JSONException e) {
-//            Log.e(TAG + "error", e.getMessage().toString());
-//        }
     }
 
     //获取两点之间的距离

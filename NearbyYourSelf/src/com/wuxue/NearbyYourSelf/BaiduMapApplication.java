@@ -16,7 +16,7 @@ public class BaiduMapApplication extends Application {
     public boolean m_bKeyRight = true;
     public BMapManager mBMapManager = null;
 
-    public static final String strKey = "czxwArZaoAjyBMn53kfqcuBB";
+    public static final String strKey = "CryekgHTIZq55TvnO49hs6OW";
 
     @Override
     public void onCreate() {
