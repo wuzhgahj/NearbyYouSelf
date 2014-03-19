@@ -95,8 +95,10 @@ public class MyActivity extends Activity {
                     return;
                 }
                 addressText.setText(bdLocation.getAddrStr());
+                //获取现在所处的经纬度
                 nowLatitude = bdLocation.getLatitude()+"";
                 nowLongitude = bdLocation.getLongitude()+"";
+                //向SearchActivity传递经纬度
                 intent = new Intent(MyActivity.this,SearchActivity.class);
                 intent.putExtra("nowLatitude",nowLatitude);
                 intent.putExtra("nowLongitude",nowLongitude);
@@ -152,7 +154,6 @@ public class MyActivity extends Activity {
         if(addressText==null||addressText.equals("")){
             Toast.makeText(this,"定位中,请稍等....",Toast.LENGTH_SHORT).show();
         }else {
-            Intent intent = new Intent(this, SearchActivity.class);
             startActivity(intent);
         }
 

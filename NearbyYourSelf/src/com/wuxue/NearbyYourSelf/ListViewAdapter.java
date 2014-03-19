@@ -46,7 +46,7 @@ public class ListViewAdapter extends SimpleAdapter {
                 Log.d("click", "点击第" + pos + "按钮");
             }
         });
-         final TextView textView = (TextView) view.findViewById(R.id.textView);
+        final TextView textView = (TextView) view.findViewById(R.id.textView);
         textView.setSelected(true);
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
