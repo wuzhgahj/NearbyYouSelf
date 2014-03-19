@@ -114,13 +114,14 @@ public class SearchActivity extends Activity {
         listInfo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(TAG,list.size()+ "   这是集合大小");
                 Map<String, Object> map = list.get(position);
                 Intent intent = new Intent(SearchActivity.this, BaiduMapActivity.class);
                 intent.putExtra("shopLatitude", map.get("shopLatitude").toString());
                 intent.putExtra("shopLongitude", map.get("shopLongitude").toString());
-                intent.putExtra("nowLongitude", nowLongitude);
-                intent.putExtra("nowLatitude", nowLatitude);
-                Log.d(TAG, shopLatitude + " 商店 " + shopLongitude + " 自己 " + nowLatitude + nowLongitude);
+                intent.putExtra("nowLongitude", nowLongitude+"");
+                intent.putExtra("nowLatitude", nowLatitude+"");
+                Log.d(TAG, shopLatitude + " 商店 " + shopLongitude + " 自己 " + nowLatitude +"  "+ nowLongitude);
                 startActivity(intent);
             }
         });
@@ -251,6 +252,7 @@ public class SearchActivity extends Activity {
                 map.put("nowLatitude", nowLatitude);
                 list.add(map);
             }
+            Log.d(TAG,list.size()+"json的list的大小  ");
             a += 5;
         } catch (JSONException e) {
             Log.e(TAG + "error", e.getMessage().toString());
@@ -289,6 +291,7 @@ public class SearchActivity extends Activity {
                 map.put("nowLatitude", nowLatitude);
                 list.add(map);
             }
+            Log.d(TAG,list.size()+"  jsonbt的list的大小  ");
             a += 5;
         } catch (JSONException e) {
             Log.e(TAG + "error", e.getMessage().toString());

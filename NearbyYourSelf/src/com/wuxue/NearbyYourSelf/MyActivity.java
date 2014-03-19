@@ -155,7 +155,6 @@ public class MyActivity extends Activity {
             Toast.makeText(this,"定位中,请稍等....",Toast.LENGTH_SHORT).show();
         }else {
             startActivity(intent);
-            finish();
         }
     }
 
