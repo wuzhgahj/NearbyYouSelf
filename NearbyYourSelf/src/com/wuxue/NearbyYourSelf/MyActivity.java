@@ -32,7 +32,10 @@ public class MyActivity extends Activity {
     private ListView listView;
     private List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
     private LocationClient locationClient = null;
-    private final String TAG = "address";
+    private final String TAG = "wawawawa";
+    private String nowLongitude = null;
+    private String nowLatitude = null;
+    private Intent intent = null;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +50,14 @@ public class MyActivity extends Activity {
         btSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                search();
+                if(((String)nowLongitude)==null||((String)nowLatitude)==null||intent==null){
+                    Log.d(TAG,"double是空的啊");
+                    Toast.makeText(MyActivity.this,"定位中,请稍等...",Toast.LENGTH_SHORT).show();
+                }else{
+                    search();
+                    startActivity(intent);
+                }
+
             }
         });
 
@@ -85,6 +95,11 @@ public class MyActivity extends Activity {
                     return;
                 }
                 addressText.setText(bdLocation.getAddrStr());
+                nowLatitude = bdLocation.getLatitude()+"";
+                nowLongitude = bdLocation.getLongitude()+"";
+                intent = new Intent(MyActivity.this,SearchActivity.class);
+                intent.putExtra("nowLatitude",nowLatitude);
+                intent.putExtra("nowLongitude",nowLongitude);
             }
 
             @Override
@@ -134,8 +149,13 @@ public class MyActivity extends Activity {
     }
 
     public void search() {
-        Intent intent = new Intent(this, SearchActivity.class);
-        startActivity(intent);
+        if(addressText==null||addressText.equals("")){
+            Toast.makeText(this,"定位中,请稍等....",Toast.LENGTH_SHORT).show();
+        }else {
+            Intent intent = new Intent(this, SearchActivity.class);
+            startActivity(intent);
+        }
+
     }
 
     private void location() {
