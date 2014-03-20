@@ -2,7 +2,6 @@ package com.wuxue.NearbyYourSelf;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,8 +11,6 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
-import com.handmark.pulltorefresh.library.PullToRefreshBase;
-import com.handmark.pulltorefresh.library.PullToRefreshListView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,40 +33,43 @@ public class MyActivity extends Activity {
     private String nowLongitude = null;
     private String nowLatitude = null;
     private Intent intent = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
         init();
+
         final ListViewAdapter adapter = new ListViewAdapter(
                 this, list, R.layout.listview, new String[]{"servers"},
                 new int[]{R.id.textView});
         listView.setAdapter(adapter);
 
+        //搜索按钮增加事件
         btSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(nowLongitude==null||nowLatitude==null||intent==null){
-                    Log.d(TAG,"double是空的啊");
-                    Toast.makeText(MyActivity.this,"定位中,请稍等...",Toast.LENGTH_SHORT).show();
-                    return;
-                }else{
-                    Log.d(TAG,nowLatitude+"  "+nowLongitude);
+                if ((null == ("" + nowLongitude) || "".equals(nowLongitude)) || (null == ("" + nowLongitude) || "".equals(nowLatitude)) || (null == intent)) {
+                    Log.d(TAG, "double是空的啊");
+                    Toast.makeText(MyActivity.this, "定位中,请稍等...", Toast.LENGTH_SHORT).show();
+                } else {
                     search();
+                    startActivity(intent);
                 }
+
             }
         });
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("position", "" + position);
-                adapter.notifyDataSetChanged();
-            }
-        });
+//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                Log.d("position", "" + position);
+//                adapter.notifyDataSetChanged();
+//            }
+//        });
 
-
+        //定位按钮增加事件
         btLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,7 +80,7 @@ public class MyActivity extends Activity {
 
         LocationClientOption option = new LocationClientOption();
         option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);//设置定位模式
-        option.setCoorType("bd09ll");//返回的定位结果是百度经纬度，默认值gcj02
+        option.setCoorType("bd09ll");//返回的定位结果是百0度经纬度，默认值gcj02
         option.setScanSpan(0);//设置发起定位请求的间隔时间为5000ms
         option.setIsNeedAddress(true);//返回的定位结果包含地址信息
         option.setNeedDeviceDirect(true);//返回的定位结果包含手机机头的方向
@@ -96,12 +96,12 @@ public class MyActivity extends Activity {
                 }
                 addressText.setText(bdLocation.getAddrStr());
                 //获取现在所处的经纬度
-                nowLatitude = bdLocation.getLatitude()+"";
-                nowLongitude = bdLocation.getLongitude()+"";
+                nowLatitude = bdLocation.getLatitude() + "";
+                nowLongitude = bdLocation.getLongitude() + "";
                 //向SearchActivity传递经纬度
-                intent = new Intent(MyActivity.this,SearchActivity.class);
-                intent.putExtra("nowLatitude",nowLatitude);
-                intent.putExtra("nowLongitude",nowLongitude);
+                intent = new Intent(MyActivity.this, SearchActivity.class);
+                intent.putExtra("nowLatitude", nowLatitude);
+                intent.putExtra("nowLongitude", nowLongitude);
             }
 
             @Override
@@ -120,7 +120,7 @@ public class MyActivity extends Activity {
         btSetting = (ImageButton) findViewById(R.id.btnSetting);
         btLocation = (ImageButton) findViewById(R.id.btLocation);
         addressText = (TextView) findViewById(R.id.addressText);
-        listView = (ListView) findViewById(R.id.listView);//下拉刷新
+        listView = (ListView) findViewById(R.id.listView);
         HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("servers", "餐饮服务");
         list.add(map);
@@ -151,11 +151,12 @@ public class MyActivity extends Activity {
     }
 
     public void search() {
-        if(addressText.getText().toString()==null||addressText.getText().toString().equals("")){
-            Toast.makeText(this,"定位中,请稍等....",Toast.LENGTH_SHORT).show();
-        }else {
+        if (addressText == null || addressText.equals("")) {
+            Toast.makeText(this, "定位中,请稍等....", Toast.LENGTH_SHORT).show();
+        } else {
             startActivity(intent);
         }
+
     }
 
     private void location() {
