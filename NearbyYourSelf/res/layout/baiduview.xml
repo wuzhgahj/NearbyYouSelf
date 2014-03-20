@@ -4,9 +4,27 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content">
+        <ImageButton android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                android:id="@+id/btWalk"
+                android:layout_weight="1"/>
+
+        <ImageButton android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:id="@+id/btBUS"
+                     android:layout_weight="1"/>
+
+        <ImageButton android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:id="@+id/btCar"
+                     android:layout_weight="1"/>
+                  </LinearLayout>
     <com.baidu.mapapi.map.MapView
             android:id="@+id/mapView"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:clickable="true"/>
+
 </LinearLayout>

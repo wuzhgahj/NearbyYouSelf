@@ -43,7 +43,6 @@ public class BaiduMapApplication extends Application {
 
     // 常用事件监听，用来处理通常的网络错误，授权验证错误等
     static class MyGeneralListener implements MKGeneralListener {
-
         @Override
         public void onGetNetworkState(int iError) {
             if (iError == MKEvent.ERROR_NETWORK_CONNECT) {
@@ -54,7 +53,6 @@ public class BaiduMapApplication extends Application {
                 Toast.makeText(BaiduMapApplication.getInstance().getApplicationContext(), "输入正确的检索条件！",
                         Toast.LENGTH_LONG).show();
             }
-            // ...
         }
 
         @Override
